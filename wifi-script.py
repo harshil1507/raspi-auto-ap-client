@@ -63,7 +63,9 @@ selectedChannel = selectedChannel[1]
 pathToHostapdConf = pwd + "/hostapd/hostapd.conf"
 print("Creating hostapd.conf")
 hostapdConf = open(pathToHostapdConf, "w")
-hostapdConfigToWrite = "channel={channel}\nssid=raspi\nwpa_passphrase=raspberry\ninterface=uap0\nhw_mode=g\nmacaddr_acl=0\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=2\nwpa_key_mgmt=WPA-PSK\nwpa_pariwise=TKIP\nrsn_pairwise=CCMP\ndriver=nl80211"
+hostapdConfigToWrite = "channel={channel}\nssid=raspi\nwpa_passphrase=raspberry\ninterface=uap0\nhw_mode=g\nmacaddr_acl=0\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=2\nwpa_key_mgmt=WPA-PSK\nwpa_pariwise=TKIP\nrsn_pairwise=CCMP\ndriver=nl80211".format(
+    channel=selectedChannel
+)
 hostapdConf.write(hostapdConfigToWrite)
 hostapdConf.close()
 print("created hostapd.conf")
@@ -92,6 +94,7 @@ print("editing rc.local")
 rcLocalOriginal = open(pathToRcLocal, "r+")
 modifiedRcLocal = rcLocalOriginal.readlines();
 modifiedRcLocal.insert(-1, "/bin/bash /usr/local/bin/wifistart\n")
+rcLocalOriginal.seek(0)
 rcLocalOriginal.writelines(modifiedRcLocal)
 rcLocalOriginal.close()
 print("rc.local edited")
