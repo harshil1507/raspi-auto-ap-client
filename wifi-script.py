@@ -81,7 +81,7 @@ newPwd = os.getcwd()
 startUpScriptPath = newPwd + '/wifistart'
 print("creating startup script")
 startUpScript = open(startUpScriptPath, "w")
-startUpScript.write('#!/bin/bash\n\necho "stopping newtwork services if running"\nsystemctl stop hostapd.service\nsystemctl stop dnsmasq.service\nsystemctl stop dhcpcd.service\n\necho "Removing uap0 interface"\niw dev uap0 del\necho "adding uap0 interface"\niw dev wla0 interface add uap0 type __ap\necho "IPV4 forwarding setting..."\nsysctl net.ipv4.ip_forward=1\necho "editing IP tables"\niptables -t nat -A POSTROUTING -s 192.168.70.0/24 ! -d 192.168.70.0/24 -j MASQUERADE\nifconfig uap0 up\n\necho "Starting hostapd service..."\nsystemctl start hostapd.service\nsleep 10\n\necho "Starting dhcpcd service..."\nsystemctl start dhcpcd.service\nsleep 5\n\necho "Starting dnsmasq service..."\nsystemctl start dnsmasq.service\necho "wifistart DONE"')
+startUpScript.write('#!/bin/bash\n\necho "stopping newtwork services if running"\nsystemctl stop hostapd.service\nsystemctl stop dnsmasq.service\nsystemctl stop dhcpcd.service\n\necho "Removing uap0 interface"\niw dev uap0 del\necho "adding uap0 interface"\niw dev wlan0 interface add uap0 type __ap\necho "IPV4 forwarding setting..."\nsysctl net.ipv4.ip_forward=1\necho "editing IP tables"\niptables -t nat -A POSTROUTING -s 192.168.50.0/24 ! -d 192.168.50.0/24 -j MASQUERADE\nifconfig uap0 up\n\necho "Starting hostapd service..."\nsystemctl start hostapd.service\nsleep 10\n\necho "Starting dhcpcd service..."\nsystemctl start dhcpcd.service\nsleep 5\n\necho "Starting dnsmasq service..."\nsystemctl start dnsmasq.service\necho "wifistart DONE"')
 startUpScript.close()
 print("startup script created")
 
