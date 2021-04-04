@@ -33,11 +33,11 @@ print("dhcpcd.conf configured")
 # make backup of dnsmasq.conf
 os.system("sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig")
 
-# create new dnsmasq.conf - open file in read mode to auto create
+# create new dnsmasq.conf - open file in write mode to auto create
 # ip range is arbitrary but I have set the range to include the static ip of our ap interface
 pathToDnsmasq = pwd + "/dnsmasq.conf"
 print("creating dnsmasq.conf")
-dnsmasq = open(pathToDnsmasq)
+dnsmasq = open(pathToDnsmasq, "w")
 dnsmasq.write("interface=lo,uap0\nbin-interfaces\nserver=8.8.8.8\ndomain-needed\nbogus-priv\ndhcp-range=192.168.50.1,192.168.50.150,12h\n")
 dnsmasq.close()
 print("dnsmasq.conf created")
