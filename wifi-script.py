@@ -38,7 +38,7 @@ os.system("sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig")
 pathToDnsmasq = pwd + "/dnsmasq.conf"
 print("creating dnsmasq.conf")
 dnsmasq = open(pathToDnsmasq, "w")
-dnsmasq.write("interface=lo,uap0\nbin-interfaces\nserver=8.8.8.8\ndomain-needed\nbogus-priv\ndhcp-range=192.168.50.1,192.168.50.150,12h\n")
+dnsmasq.write("interface=lo,uap0\nbind-interfaces\nserver=8.8.8.8\ndomain-needed\nbogus-priv\ndhcp-range=192.168.50.1,192.168.50.150,12h\n")
 dnsmasq.close()
 print("dnsmasq.conf created")
 
