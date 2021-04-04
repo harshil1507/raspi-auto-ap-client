@@ -7,7 +7,7 @@ os.system("sudo apt-get update -y")
 os.system("sudo apt-get upgrade -y")
 
 # install hostapd and dnsmasq -y for unattended install
-os.system("sudo apt-get hostapd dnsmasq -y")
+os.system("sudo apt-get install hostapd dnsmasq -y")
 
 # edit /etc/dhcpcd.conf file
 
