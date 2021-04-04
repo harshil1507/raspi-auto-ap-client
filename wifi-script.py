@@ -8,7 +8,7 @@ os.system("sudo apt-get upgrade -y")
 
 # install hostapd and dnsmasq -y for unattended install
 os.system("sudo apt-get install hostapd dnsmasq -y")
-
+os.system("sudo systemctl unmask hostapd && sudo systemctl enable hostapd")
 # edit /etc/dhcpcd.conf file
 
 # change workdir to /etc
@@ -50,7 +50,7 @@ selectedInterface = interfaces[0]
 
 # get channel of the connected wifi network
 selectedChannel = ''
-getChannelCmd = "iw" + selectedInterface + "info"
+getChannelCmd = "iw " + selectedInterface + " info"
 channels = os.popen(getChannelCmd).read()
 channels = channels.splitlines()
 for i in channels:
@@ -75,7 +75,7 @@ f.write('DAEMON_CONF="/etc/hostapd/hostapd.conf"')
 f.close()
 
 # create startup script
-os.chdir("usr/local/bin")
+os.chdir("/usr/local/bin")
 newPwd = os.getcwd()
 startUpScriptPath = newPwd + '/wifistart'
 print("creating startup script")
