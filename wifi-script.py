@@ -8,7 +8,6 @@ os.system("sudo apt-get upgrade -y")
 
 # install hostapd and dnsmasq -y for unattended install
 os.system("sudo apt-get install hostapd dnsmasq -y")
-os.system("sudo systemctl unmask hostapd && sudo systemctl enable hostapd")
 # edit /etc/dhcpcd.conf file
 
 # change workdir to /etc
@@ -106,6 +105,8 @@ os.system("sudo systemctl stop dhcpcd")
 os.system("sudo systemctl disable hostapd")
 os.system("sudo systemctl disable dnsmasq")
 os.system("sudo systemctl disable dhcpcd")
+
+os.system("sudo systemctl unmask hostapd && sudo systemctl enable hostapd")
 
 # start custom script
 os.system("sudo sh /usr/local/bin/wifistart")
