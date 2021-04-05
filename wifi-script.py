@@ -102,7 +102,7 @@ hostapdConfigToWrite = ["# Set the channel (frequency) of the host access point\
 #     channel=selectedChannel
 # )
 print(hostapdConfigToWrite)
-hostapdConf.write(hostapdConfigToWrite)
+hostapdConf.writelines(hostapdConfigToWrite)
 hostapdConf.close()
 print("created hostapd.conf")
 
