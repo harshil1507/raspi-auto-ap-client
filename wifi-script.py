@@ -98,10 +98,6 @@ hostapdConfigToWrite = ["# Set the channel (frequency) of the host access point\
                         "#wmm_enabled=1\n",
                         "# Enable 40MHz channels with 20ns guard interval\n",
                         "#ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]\n"]
-# hostapdConfigToWrite = "channel={channel}\nssid=raspi\nwpa_passphrase=raspberry\ninterface=uap0\nhw_mode=g\nmacaddr_acl=0\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=2\nwpa_key_mgmt=WPA-PSK\nwpa_pariwise=TKIP\nrsn_pairwise=CCMP\ndriver=nl80211".format(
-#     channel=selectedChannel
-# )
-print(hostapdConfigToWrite)
 hostapdConf.writelines(hostapdConfigToWrite)
 hostapdConf.close()
 print("created hostapd.conf")
@@ -158,7 +154,6 @@ startUpScriptToWrite = ['#!/bin/bash\n',
                         'systemctl start dnsmasq.service\n',
                         'echo "wifistart DONE"\n']
 startUpScript.writelines(startUpScriptToWrite)
-# startUpScript.write('#!/bin/bash\n\necho "stopping newtwork services if running"\nsystemctl stop hostapd.service\nsystemctl stop dnsmasq.service\nsystemctl stop dhcpcd.service\n\necho "Removing uap0 interface"\niw dev uap0 del\necho "adding uap0 interface"\niw dev wlan0 interface add uap0 type __ap\necho "IPV4 forwarding setting..."\nsysctl net.ipv4.ip_forward=1\necho "editing IP tables"\niptables -t nat -A POSTROUTING -s 192.168.50.0/24 ! -d 192.168.50.0/24 -j MASQUERADE\nifconfig uap0 up\n\necho "Starting hostapd service..."\nsystemctl start hostapd.service\nsleep 10\n\necho "Starting dhcpcd service..."\nsystemctl start dhcpcd.service\nsleep 5\n\necho "Starting dnsmasq service..."\nsystemctl start dnsmasq.service\necho "wifistart DONE"')
 startUpScript.close()
 print("startup script created")
 
