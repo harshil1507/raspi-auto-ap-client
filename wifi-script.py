@@ -23,10 +23,11 @@ pathToDhcpcdConf = os.path.abspath(pathToDhcpcdConf)
 
 # open dhcpcd.conf file in append mode
 print("editing dhcpcd.conf")
-dhcpd = open(pathToDhcpcdConf, "a")
-dhcpd.write(
-    "interface uap0\n\tstatic ip_address=192.168.50.1/24\n\tnohook wpa_supplicant")
-dhcpd.close()
+dhcpcd = open(pathToDhcpcdConf, "a")
+dhcpcd_content = ["interface uap0\n",
+                  "static ip_address=192.168.50.1/24\n", "nohook wpa_supplicant\n"]
+dhcpcd.writelines(dhcpcd_content)
+dhcpcd.close()
 print("dhcpcd.conf configured")
 
 # make backup of dnsmasq.conf
@@ -37,6 +38,13 @@ os.system("sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig")
 pathToDnsmasq = pwd + "/dnsmasq.conf"
 print("creating dnsmasq.conf")
 dnsmasq = open(pathToDnsmasq, "w")
+dnsmasq_content = ["interface=lo,uap0               #Use interfaces lo and uap0\n",
+                   "bind-interfaces                 #Bind to the interfaces\n",
+                   "server= 8.8.8.8  # Forward DNS requests to Google DNS\n",
+                   "domain-needed  # Don't forward short names\n",
+                   "bogus-priv  # Never forward addresses in the non-routed address spaces\n",
+                   "# Assign IP addresses between 192.168.70.50 and 192.168.70.150 with a 12-hour lease time\n",
+                   "dhcp-range= 192.168.70.50, 192.168.70.150, 12h"]
 dnsmasq.write("interface=lo,uap0\nbind-interfaces\nserver=8.8.8.8\ndomain-needed\nbogus-priv\ndhcp-range=192.168.50.1,192.168.50.150,12h\n")
 dnsmasq.close()
 print("dnsmasq.conf created")
@@ -62,16 +70,45 @@ selectedChannel = selectedChannel[1]
 pathToHostapdConf = pwd + "/hostapd/hostapd.conf"
 print("Creating hostapd.conf")
 hostapdConf = open(pathToHostapdConf, "w")
-hostapdConfigToWrite = "channel={channel}\nssid=raspi\nwpa_passphrase=raspberry\ninterface=uap0\nhw_mode=g\nmacaddr_acl=0\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=2\nwpa_key_mgmt=WPA-PSK\nwpa_pariwise=TKIP\nrsn_pairwise=CCMP\ndriver=nl80211".format(
-    channel=selectedChannel
-)
+hostapdConfigToWrite = ["# Set the channel (frequency) of the host access point\n",
+                        "channel={channel}\n".format(channel=selectedChannel),
+                        "# Set the SSID broadcast by your access point (replace with your own, of course)\n",
+                        "ssid=raspi\n",
+                        "# This sets the passphrase for your access point (again, use your own)\n",
+                        "wpa_passphrase=raspberry\n",
+                        "# This is the name of the WiFi interface we configured above\n",
+                        "interface=uap0\n",
+                        "# Use the 2.4GHz band (I think you can use in ag mode to get the 5GHz band as well, but I have not tested this yet)\n",
+                        "hw_mode=g\n",
+                        "# Accept all MAC addresses\n",
+                        "macaddr_acl=0\n",
+                        "# Use WPA authentication\n",
+                        "auth_algs=1\n",
+                        "# Require clients to know the network name\n",
+                        "ignore_broadcast_ssid=0\n",
+                        "# Use WPA2\n",
+                        "wpa=2\n",
+                        "# Use a pre-shared key\n",
+                        "wpa_key_mgmt=WPA-PSK\n",
+                        "wpa_pairwise=TKIP\n",
+                        "rsn_pairwise=CCMP\n",
+                        "driver=nl80211\n",
+                        "# I commented out the lines below in my implementation, but I kept them here for reference.\n",
+                        "# Enable WMM\n",
+                        "#wmm_enabled=1\n",
+                        "# Enable 40MHz channels with 20ns guard interval\n",
+                        "#ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]\n"]
+# hostapdConfigToWrite = "channel={channel}\nssid=raspi\nwpa_passphrase=raspberry\ninterface=uap0\nhw_mode=g\nmacaddr_acl=0\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=2\nwpa_key_mgmt=WPA-PSK\nwpa_pariwise=TKIP\nrsn_pairwise=CCMP\ndriver=nl80211".format(
+#     channel=selectedChannel
+# )
+print(hostapdConfigToWrite)
 hostapdConf.write(hostapdConfigToWrite)
 hostapdConf.close()
 print("created hostapd.conf")
 
 # edit /etc/default/hostapd
 path = pwd + '/default/hostapd'
-f = open(path,"a")
+f = open(path, "a")
 f.write('DAEMON_CONF="/etc/hostapd/hostapd.conf"')
 f.close()
 
@@ -81,7 +118,47 @@ newPwd = os.getcwd()
 startUpScriptPath = newPwd + '/wifistart'
 print("creating startup script")
 startUpScript = open(startUpScriptPath, "w")
-startUpScript.write('#!/bin/bash\n\necho "stopping newtwork services if running"\nsystemctl stop hostapd.service\nsystemctl stop dnsmasq.service\nsystemctl stop dhcpcd.service\n\necho "Removing uap0 interface"\niw dev uap0 del\necho "adding uap0 interface"\niw dev wlan0 interface add uap0 type __ap\necho "IPV4 forwarding setting..."\nsysctl net.ipv4.ip_forward=1\necho "editing IP tables"\niptables -t nat -A POSTROUTING -s 192.168.50.0/24 ! -d 192.168.50.0/24 -j MASQUERADE\nifconfig uap0 up\n\necho "Starting hostapd service..."\nsystemctl start hostapd.service\nsleep 10\n\necho "Starting dhcpcd service..."\nsystemctl start dhcpcd.service\nsleep 5\n\necho "Starting dnsmasq service..."\nsystemctl start dnsmasq.service\necho "wifistart DONE"')
+startUpScriptToWrite = ['#!/bin/bash\n',
+
+                        '# Redundant stops to make sure services are not running\n',
+                        'echo "Stopping network services (if running)..."\n',
+                        'systemctl stop hostapd.service\n',
+                        'systemctl stop dnsmasq.service\n',
+                        'systemctl stop dhcpcd.service\n',
+
+                        '#Make sure no uap0 interface exists (this generates an error; we could probably use an if statement to check if it exists first)\n',
+                        'echo "Removing uap0 interface..."\n',
+                        'iw dev uap0 del\n',
+
+                        '#Add uap0 interface (this is dependent on the wireless interface being called wlan0, which it may not be in Stretch)\n',
+                        'echo "Adding uap0 interface..."\n',
+                        'iw dev wlan0 interface add uap0 type __ap\n',
+
+                        '#Modify iptables (these can probably be saved using iptables-persistent if desired)\n',
+                        'echo "IPV4 forwarding: setting..."\n',
+                        'sysctl net.ipv4.ip_forward=1\n',
+                        'echo "Editing IP tables..."\n',
+                        'iptables -t nat -A POSTROUTING -s 192.168.70.0/24 ! -d 192.168.70.0/24 -j MASQUERADE\n',
+
+                        '# Bring up uap0 interface. Commented out line may be a possible alternative to using dhcpcd.conf to set up the IP address.\n',
+                        '#ifconfig uap0 192.168.70.1 netmask 255.255.255.0 broadcast 192.168.70.255\n',
+                        'ifconfig uap0 up\n',
+
+                        '# Start hostapd. 10-second sleep avoids some race condition, apparently. It may not need to be that long. (?) \n',
+                        'echo "Starting hostapd service..."\n',
+                        'systemctl start hostapd.service\n',
+                        'sleep 10\n',
+
+                        '#Start dhcpcd. Again, a 5-second sleep\n',
+                        'echo "Starting dhcpcd service..."\n',
+                        'systemctl start dhcpcd.service\n',
+                        'sleep 5\n',
+
+                        'echo "Starting dnsmasq service..."\n',
+                        'systemctl start dnsmasq.service\n',
+                        'echo "wifistart DONE"\n']
+startUpScript.writelines(startUpScriptToWrite)
+# startUpScript.write('#!/bin/bash\n\necho "stopping newtwork services if running"\nsystemctl stop hostapd.service\nsystemctl stop dnsmasq.service\nsystemctl stop dhcpcd.service\n\necho "Removing uap0 interface"\niw dev uap0 del\necho "adding uap0 interface"\niw dev wlan0 interface add uap0 type __ap\necho "IPV4 forwarding setting..."\nsysctl net.ipv4.ip_forward=1\necho "editing IP tables"\niptables -t nat -A POSTROUTING -s 192.168.50.0/24 ! -d 192.168.50.0/24 -j MASQUERADE\nifconfig uap0 up\n\necho "Starting hostapd service..."\nsystemctl start hostapd.service\nsleep 10\n\necho "Starting dhcpcd service..."\nsystemctl start dhcpcd.service\nsleep 5\n\necho "Starting dnsmasq service..."\nsystemctl start dnsmasq.service\necho "wifistart DONE"')
 startUpScript.close()
 print("startup script created")
 
@@ -91,7 +168,7 @@ pwd = os.getcwd()
 pathToRcLocal = pwd + '/rc.local'
 print("editing rc.local")
 rcLocalOriginal = open(pathToRcLocal, "r+")
-modifiedRcLocal = rcLocalOriginal.readlines();
+modifiedRcLocal = rcLocalOriginal.readlines()
 modifiedRcLocal.insert(-1, "/bin/bash /usr/local/bin/wifistart\n")
 rcLocalOriginal.seek(0)
 rcLocalOriginal.writelines(modifiedRcLocal)
