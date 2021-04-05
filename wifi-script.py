@@ -25,7 +25,7 @@ pathToDhcpcdConf = os.path.abspath(pathToDhcpcdConf)
 print("editing dhcpcd.conf")
 dhcpcd = open(pathToDhcpcdConf, "a")
 dhcpcd_content = ["interface uap0\n",
-                  "static ip_address=192.168.50.1/24\n", "nohook wpa_supplicant\n"]
+                  "\tstatic ip_address=192.168.50.1/24\n", "\tnohook wpa_supplicant\n"]
 dhcpcd.writelines(dhcpcd_content)
 dhcpcd.close()
 print("dhcpcd.conf configured")
