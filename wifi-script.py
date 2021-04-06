@@ -222,9 +222,10 @@ def setStartupScript() :
 # Start by settings the working directory of the script
 scriptWD = os.path.abspath(os.getcwd())
 print(style.GREEN + "Saving current directory ( " + scriptWD + " ) as Global")
-#installApplications()
+if os.system("dpkg-query -W -f='${Status} ${Version}\n' hostapd") == 256 :
+    installApplications()
 setDHCPFile()
 setDNSMasq()
-setHostAPD("raspberrypi", "NOPSK")
+setHostAPD("raspberrypi", "628628628")
 setStartupScript()
 stopServices()
