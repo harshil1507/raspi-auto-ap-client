@@ -165,7 +165,7 @@ def setHostAPD(SSID, PSK) :
   # read and update file
   content = readFile('/hostapd.conf')
   content = content.replace("channel=1", "channel=" + selectedChannel)
-  content = content.replace("ssid=yourSSIDher", "ssid=" + SSID)
+  content = content.replace("ssid=yourSSIDhere", "ssid=" + SSID)
   content = content.replace("wpa_passphrase=passwordBetween8and64charactersLong", "wpa_passphrase=" + PSK)
   print(style.GREEN + 'Content to be saved on the file -> ' + content)
   
