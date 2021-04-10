@@ -70,7 +70,7 @@ def readFile(path) :
   """
   print(style.BLUE + 'Reading temp ' + path + ' | Path :' + style.RED + scriptWD + path)
   
-  if path.count('/') > 2 :
+  if path.count('/') > 1 :
     tempFile = open(path)
   else :
     tempFile = open(scriptWD + path)
@@ -165,7 +165,7 @@ def setHostAPD(SSID, PSK) :
   # read and update file
   content = readFile('/hostapd.conf')
   content = content.replace("channel=1", "channel=" + selectedChannel)
-  content = content.replace("ssid=yourSSIDher", "ssid=" + SSID)
+  content = content.replace("ssid=yourSSIDhere", "ssid=" + SSID)
   content = content.replace("wpa_passphrase=passwordBetween8and64charactersLong", "wpa_passphrase=" + PSK)
   print(style.GREEN + 'Content to be saved on the file -> ' + content)
   
@@ -182,7 +182,8 @@ def setHostAPD(SSID, PSK) :
   # edit /etc/default/hostapd
   path = '/etc/default/hostapd'
   content = readFile(path)
-  if content.find('DAEMON_CONF="/etc/hostapd/hostapd.conf"') :
+  isInIt = content.find('DAEMON_CONF="/etc/hostapd/hostapd.conf"') 
+  if isInIt != -1:
     print(style.GREEN + "DAEMON_CONF are already Updated")
   else :
     f = open(path, "a")
@@ -208,13 +209,21 @@ def setStartupScript() :
   
   # edit /etc/rc.local
   pathToRcLocal = '/etc/rc.local'
-  print(style.YELLOW + "Editing rc.local")
-  rcLocalOriginal = open(pathToRcLocal, "r+")
-  modifiedRcLocal = rcLocalOriginal.readlines()
-  modifiedRcLocal.insert(-1, "/bin/bash /usr/local/bin/wifistart\n")
-  rcLocalOriginal.seek(0)
-  rcLocalOriginal.writelines(modifiedRcLocal)
-  rcLocalOriginal.close()
+  content = readFile(pathToRcLocal)
+  isInIt = content.find("/bin/bash /usr/local/bin/wifistart") 
+
+  if isInIt == -1 :
+    print(style.YELLOW + "Editing rc.local")
+    rcLocalOriginal = open(pathToRcLocal, "r+")
+    modifiedRcLocal = rcLocalOriginal.readlines()
+    modifiedRcLocal.insert(-1, "/bin/bash /usr/local/bin/wifistart\n")
+    rcLocalOriginal.seek(0)
+    rcLocalOriginal.writelines(modifiedRcLocal)
+    rcLocalOriginal.close()
+    os.system("systemctl daemon-reload")
+  else : 
+    print(style.CYAN+ "rc.local Already set")
+  
 
 
 
